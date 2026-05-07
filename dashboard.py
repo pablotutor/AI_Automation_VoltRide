@@ -41,16 +41,16 @@ last_run = datetime.fromtimestamp(DASHBOARD_CSV.stat().st_mtime).strftime("%Y-%m
 # ── Metrics ───────────────────────────────────────────────────────────────────
 nc_count = len(df)
 
-# Estimate total orders from the audit log (last run summary) — fall back to nc_count
-total_orders = nc_count
+# Read total orders checked from the run_summary entry in the latest audit log
+total_orders = nc_count  # fallback if no summary found
 audit_files = sorted(AUDIT_LOG_DIR.glob("audit_log_*.jsonl"), reverse=True)
 if audit_files:
     try:
         with open(audit_files[0]) as f:
             entries = [json.loads(l) for l in f if l.strip()]
-        output_entries = [e for e in entries if e.get("stage") == "output"]
-        if output_entries:
-            total_orders = max(total_orders, len(output_entries))
+        summary = next((e for e in reversed(entries) if e.get("stage") == "run_summary"), None)
+        if summary:
+            total_orders = max(total_orders, summary["total_orders_checked"])
     except Exception:
         pass
 
@@ -62,7 +62,7 @@ col1.metric("Orders (non-conforming)", nc_count)
 col2.metric("NC Rate", f"{nc_rate*100:.1f}%")
 col3.metric("Threshold", f"{ALERT_THRESHOLD*100:.0f}%")
 col4.metric("Status", "ALERT" if alert else "OK", delta="above threshold" if alert else "within threshold",
-            delta_color="inverse")
+            delta_color="inverse" if alert else "off")
 
 if alert:
     st.error(f"Non-conformance rate {nc_rate*100:.1f}% exceeds the {ALERT_THRESHOLD*100:.0f}% threshold — immediate investigation required.")

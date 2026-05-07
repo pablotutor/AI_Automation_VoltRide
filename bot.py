@@ -397,6 +397,13 @@ def run_bot(event_log_path: Path = EVENT_LOG_PATH) -> Dict[str, Any]:
 
     # Phase 6: RPA — Update dashboard
     update_dashboard(diagnoses)
+    write_audit_log({
+        'stage': 'run_summary',
+        'order_id': '__summary__',
+        'total_orders_checked': len(orders),
+        'non_conforming': len(diagnoses),
+        'nc_rate_pct': round(nc_rate * 100, 1),
+    })
 
     logger.info("=" * 70)
     logger.info("VoltRide Thread C Bot — COMPLETE")
