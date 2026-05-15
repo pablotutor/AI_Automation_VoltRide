@@ -231,5 +231,6 @@ python bot.py
 
 ## Author
 
-Developed May 2026 — UAM Business Analytics, MIST Module, Topic 6 Exam.
-Submission deadline: 13 May 2026, 23:59.
+Made by Ángel Fernández and Pablo Tutor
+
+Developed May 2026 — UAM Business Analytics, MIST Module.
